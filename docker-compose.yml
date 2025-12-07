@@ -1,0 +1,70 @@
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: gym-booker-db
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Gym#2025Strong!"
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/1433' || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  db-init:
+    image: "mcr.microsoft.com/mssql-tools:latest"
+    container_name: gym-booker-db-init
+    depends_on:
+      db:
+        condition: service_healthy
+    entrypoint: >
+      bash -lc "
+      set -e;
+
+      SQLCMD=/opt/mssql-tools18/bin/sqlcmd;
+      if [ ! -x \"$$SQLCMD\" ]; then SQLCMD=/opt/mssql-tools/bin/sqlcmd; fi;
+      [ -x \"$$SQLCMD\" ] || { echo 'sqlcmd not found'; exit 1; }
+
+      for i in {1..60}; do
+        $$SQLCMD -S db -U sa -P 'Gym#2025Strong!' -Q 'SELECT 1' && break || sleep 2;
+      done;
+
+      $$SQLCMD -S db -U sa -P 'Gym#2025Strong!' -d master -b -Q \"IF DB_ID('gym') IS NULL CREATE DATABASE gym;\";
+      $$SQLCMD -S db -U sa -P 'Gym#2025Strong!' -d master -b -Q \"IF NOT EXISTS (SELECT 1 FROM sys.sql_logins WHERE name='gym')
+        CREATE LOGIN gym WITH PASSWORD='gymStrong#2025', CHECK_POLICY = OFF;\";
+      $$SQLCMD -S db -U sa -P 'Gym#2025Strong!' -d gym -b -Q \"IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name='gym')
+        CREATE USER gym FOR LOGIN gym;
+        ALTER ROLE db_owner ADD MEMBER gym;\";
+
+      echo 'DB ready';
+      "
+  
+
+  app:
+    container_name: gym-booker-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+      db-init:
+        condition: service_completed_successfully
+    ports:
+      - "8081:8080"
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:sqlserver://db:1433;databaseName=gym;encrypt=false;trustServerCertificate=true"
+      SPRING_DATASOURCE_USERNAME: "gym"
+      SPRING_DATASOURCE_PASSWORD: "gymStrong#2025"
+      APP_UPLOAD_AVATARS_DIR: "/app/uploads/avatars"
+    volumes:
+      - uploads_data:/app/uploads
+
+volumes:
+  mssql_data:
+  uploads_data:

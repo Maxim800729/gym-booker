@@ -1,0 +1,1081 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Личный кабинет — RigertWorkout</title>
+
+    <link rel="icon" type="image/png" href="/img/logo.png"/>
+
+    <style>
+        :root{
+            --bg:#0c0c0f;
+            --panel:#12141a;
+            --panel2:#10131d;
+            --text:#f7f7f8;
+            --muted:#a6adbb;
+            --brand:#ff7a00;
+            --brand2:#ff9c3a;
+            --border:#22252d;
+        }
+        *{box-sizing:border-box}
+        body{
+            margin:0;
+            min-height:100vh;
+            background:
+                    radial-gradient(900px 500px at 20% -10%, rgba(255,122,0,.12), transparent 60%),
+                    radial-gradient(900px 500px at 80% 0%, rgba(56,189,248,.16), transparent 60%),
+                    var(--bg);
+            color:var(--text);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+        a{color:inherit;text-decoration:none}
+
+        .wrap{
+            max-width:1100px;
+            margin:32px auto 40px;
+            padding:0 20px 40px;
+        }
+
+        .cabinet-header{
+            display:flex;
+            align-items:flex-start;
+            justify-content:space-between;
+            gap:16px;
+            margin-bottom:18px;
+        }
+        .cabinet-title{
+            font-size:28px;
+            margin:0 0 4px;
+            letter-spacing:.3px;
+        }
+        .cabinet-sub{
+            font-size:14px;
+            color:var(--muted);
+        }
+
+        .header-actions{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+        }
+
+        .btn{
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            padding:9px 14px;
+            border-radius:999px;
+            border:1px solid var(--border);
+            background:linear-gradient(180deg,#181b24,#11131a);
+            color:var(--text);
+            font-size:14px;
+            font-weight:600;
+            cursor:pointer;
+            transition:.15s ease;
+            white-space:nowrap;
+        }
+        .btn:hover{
+            border-color:rgba(255,255,255,.12);
+            transform:translateY(-1px);
+        }
+        .btn-accent{
+            background:linear-gradient(90deg,var(--brand),var(--brand2));
+            border:none;
+            color:#111;
+            box-shadow:0 8px 26px rgba(255,122,0,.28);
+        }
+        .btn-ghost{
+            background:transparent;
+            border-color:var(--border);
+            color:var(--muted);
+        }
+        .btn-sm{
+            padding:7px 11px;
+            font-size:13px;
+        }
+
+        .layout{
+            display:grid;
+            grid-template-columns:290px 1fr;
+            gap:18px;
+            align-items:flex-start;
+        }
+
+        .panel{
+            background:linear-gradient(180deg,var(--panel),var(--panel2));
+            border-radius:20px;
+            border:1px solid rgba(255,255,255,.04);
+            box-shadow:0 18px 55px rgba(0,0,0,.55);
+            padding:18px;
+        }
+
+        .user-card{
+            display:flex;
+            flex-direction:column;
+            gap:14px;
+        }
+        .avatar-row{
+            display:flex;
+            align-items:center;
+            gap:14px;
+        }
+        .avatar{
+            width:72px;
+            height:72px;
+            border-radius:999px;
+            background:radial-gradient(circle at 30% 0%, rgba(255,255,255,.16), transparent 55%), #11141b;
+            border:1px solid rgba(255,255,255,.08);
+            overflow:hidden;
+            display:grid;
+            place-items:center;
+            font-weight:700;
+            font-size:20px;
+            color:var(--muted);
+            flex-shrink:0;
+        }
+        .avatar img{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            display:block;
+        }
+        .user-name{
+            font-size:18px;
+            font-weight:650;
+            margin-bottom:2px;
+        }
+        .user-email{
+            font-size:13px;
+            color:var(--muted);
+        }
+        .badge{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            padding:3px 8px;
+            border-radius:999px;
+            background:rgba(15,23,42,.9);
+            border:1px solid rgba(148,163,184,.35);
+            font-size:11px;
+            color:var(--muted);
+        }
+        .divider{
+            height:1px;
+            background:rgba(255,255,255,.06);
+            margin:6px 0 10px;
+        }
+        .side-actions{
+            display:flex;
+            flex-direction:column;
+            gap:9px;
+        }
+        .hint{
+            font-size:12px;
+            color:var(--muted);
+        }
+
+        .tabs{
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+            margin-bottom:14px;
+        }
+        .tab{
+            padding:7px 11px;
+            border-radius:999px;
+            border:1px solid rgba(148,163,184,.45);
+            background:transparent;
+            color:var(--muted);
+            font-size:13px;
+            font-weight:500;
+            cursor:pointer;
+        }
+        .tab.active{
+            background:rgba(255,122,0,.16);
+            border-color:rgba(255,122,0,.55);
+            color:var(--text);
+        }
+
+        .tab-pane{display:none}
+        .tab-pane.active{display:block}
+
+        .section-title{
+            font-size:16px;
+            font-weight:600;
+            margin-bottom:10px;
+        }
+
+        .form-block{
+            border-radius:14px;
+            border:1px solid rgba(148,163,184,.26);
+            padding:12px;
+            background:rgba(15,23,42,.65);
+            margin-bottom:12px;
+        }
+        .form-grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:12px;
+        }
+        .field{
+            display:flex;
+            flex-direction:column;
+            gap:6px;
+        }
+        .field label{
+            font-size:12px;
+            color:var(--muted);
+        }
+        .input{
+            border-radius:11px;
+            border:1px solid rgba(148,163,184,.3);
+            background:rgba(15,23,42,.9);
+            color:var(--text);
+            padding:9px 11px;
+            font-size:14px;
+            outline:none;
+        }
+        .input:disabled{
+            opacity:.8;
+            cursor:not-allowed;
+        }
+        .input::placeholder{color:rgba(148,163,184,.7);}
+
+        .row-inline{
+            display:flex;
+            gap:8px;
+            align-items:center;
+            flex-wrap:wrap;
+        }
+
+        .form-actions{
+            display:flex;
+            gap:8px;
+            margin-top:12px;
+        }
+
+        .muted{
+            font-size:13px;
+            color:var(--muted);
+        }
+        .muted-small{
+            font-size:12px;
+            color:var(--muted);
+        }
+
+        .booking-item{
+            border-radius:13px;
+            border:1px solid rgba(148,163,184,.26);
+            padding:11px 12px;
+            display:flex;
+            justify-content:space-between;
+            gap:10px;
+            align-items:flex-start;
+            background:rgba(15,23,42,.85);
+            margin-bottom:9px;
+        }
+        .booking-meta{
+            font-size:12px;
+            color:var(--muted);
+            margin-top:2px;
+        }
+        .status-pill{
+            display:inline-flex;
+            align-items:center;
+            padding:2px 7px;
+            border-radius:999px;
+            font-size:11px;
+            border:1px solid rgba(148,163,184,.45);
+            margin-top:4px;
+        }
+        .status-pill--active{
+            border-color:rgba(34,197,94,.6);
+            color:#bbf7d0;
+            background:rgba(22,163,74,.2);
+        }
+        .status-pill--cancelled{
+            border-color:rgba(248,113,113,.7);
+            color:#fecaca;
+            background:rgba(127,29,29,.55);
+        }
+
+        @media (max-width: 900px){
+            .layout{grid-template-columns:1fr}
+        }
+        @media (max-width: 640px){
+            .cabinet-header{flex-direction:column;align-items:flex-start}
+            .header-actions{width:100%}
+            .header-actions .btn{flex:1}
+            .form-grid{grid-template-columns:1fr}
+            .booking-item{flex-direction:column;align-items:flex-start}
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrap">
+
+    <header class="cabinet-header">
+        <div>
+            <h1 class="cabinet-title">Личный кабинет</h1>
+            <div class="cabinet-sub">Управляйте своими данными и тренировками RigertWorkout</div>
+        </div>
+        <div class="header-actions">
+            <a class="btn btn-ghost" href="/">На главную</a>
+            <a class="btn btn-sm" href="/booking">К расписанию</a>
+        </div>
+    </header>
+
+    <main class="layout">
+        <!-- Левая колонка: карточка пользователя -->
+        <aside class="panel user-card">
+            <div class="avatar-row">
+                <div class="avatar" id="avatarBox">
+                    <span id="avatarInitials">RW</span>
+                </div>
+                <div>
+                    <div class="user-name" id="uName">Гость</div>
+                    <div class="user-email" id="uEmail">Email не выбран</div>
+                    <div class="badge">
+                        Личный кабинет
+                    </div>
+                </div>
+            </div>
+
+            <input id="avatarInput" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+            <button class="btn btn-accent" id="avatarBtn" disabled>Загрузить фото</button>
+            <div class="hint">PNG/JPG/WebP до 5 МБ. Сначала выберите профиль по email справа.</div>
+
+            <div class="divider"></div>
+
+            <div class="side-actions">
+                <a class="btn" href="/booking">Перейти к расписанию</a>
+                <button class="btn btn-ghost" id="logoutBtn" disabled>Выйти</button>
+            </div>
+        </aside>
+
+        <!-- Правая колонка: вкладки -->
+        <section class="panel">
+            <nav class="tabs">
+                <button class="tab active" data-tab="profile">Профиль</button>
+                <button class="tab" data-tab="bookings">Мои записи</button>
+                <button class="tab" data-tab="security">Безопасность</button>
+            </nav>
+
+            <!-- Профиль -->
+            <section class="tab-pane active" id="tab-profile">
+                <div class="section-title">Профиль клиента</div>
+
+                <div class="form-block" id="loginBlock">
+                    <div class="section-title">Вход в кабинет</div>
+
+                    <div class="form-grid">
+                        <div class="field">
+                            <label>Email</label>
+                            <input id="loginEmail" class="input" type="email" placeholder="you@example.com">
+                        </div>
+                        <div class="field">
+                            <label>Пароль</label>
+                            <input id="loginPassword" class="input" type="password" placeholder="Ваш пароль">
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="btn btn-accent btn-sm" id="loginBtn">Войти</button>
+                    </div>
+
+                    <p class="muted-small">
+                        После входа профиль загрузится автоматически.
+                    </p>
+                </div>
+
+
+                <div class="form-block" style="margin-bottom:14px;">
+                    <div class="field">
+                        <label>Ваш email</label>
+                        <div class="row-inline">
+                            <input id="profile-email-input" class="input" type="email" placeholder="you@example.com">
+                            <button class="btn btn-accent btn-sm" id="loadProfileBtn">Показать</button>
+                        </div>
+                        <p class="muted-small">
+                            Мы используем email, чтобы найти ваш профиль и записи. Email запоминается в этом браузере.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="form-block">
+                    <div class="form-grid">
+                        <div class="field">
+                            <label>ФИО</label>
+                            <input id="fName" class="input" type="text" placeholder="Иванов Иван" disabled>
+                        </div>
+                        <div class="field">
+                            <label>Телефон</label>
+                            <input id="fPhone" class="input" type="tel" placeholder="+7..." disabled>
+                        </div>
+                        <div class="field">
+                            <label>Дата рождения</label>
+                            <input id="fBirth" class="input" type="date" disabled>
+                        </div>
+                        <div class="field">
+                            <label>Адрес</label>
+                            <input id="fAddr" class="input" type="text" placeholder="Город, улица..." disabled>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="btn btn-sm" id="editBtn" disabled>Редактировать</button>
+                        <button class="btn btn-accent btn-sm" id="saveBtn" disabled>Сохранить</button>
+                        <button class="btn btn-ghost btn-sm" id="cancelBtn" disabled>Отмена</button>
+                    </div>
+                </div>
+
+                <p class="muted-small">
+                    Подсказка: если вы только что зарегистрировались или записались на тренировку на странице расписания,
+                    просто нажмите «Показать» — мы найдём ваш профиль по email.
+                </p>
+            </section>
+
+            <!-- Мои записи -->
+            <section class="tab-pane" id="tab-bookings">
+                <div class="section-title">Ваши записи</div>
+                <div id="bookings-list" class="bookings-list">
+                    <p class="muted">Сначала выберите профиль по email во вкладке «Профиль».</p>
+                </div>
+            </section>
+
+            <!-- Безопасность -->
+            <!-- SECURITY -->
+            <section class="tab-pane" id="tab-security">
+                <div class="section-title">Безопасность</div>
+
+                <div class="form-block">
+                    <div class="field">
+                        <label>Текущий пароль</label>
+                        <input id="currentPassword" class="input" type="password" placeholder="Текущий пароль">
+                    </div>
+                    <div class="field">
+                        <label>Новый пароль</label>
+                        <input id="newPassword" class="input" type="password" placeholder="Новый пароль">
+                    </div>
+                    <div class="field">
+                        <label>Повторите новый пароль</label>
+                        <input id="repeatPassword" class="input" type="password" placeholder="Повторите новый пароль">
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-accent btn-sm" id="changePasswordBtn">Сменить пароль</button>
+                    </div>
+                    <p class="muted-small">
+                        Для смены пароля нужен текущий пароль. Если вы его забыли — нужен отдельный процесс восстановления через email.
+                    </p>
+                </div>
+            </section>
+
+        </section>
+    </main>
+</div>
+
+<script>
+    let currentProfile = null;
+    let initialProfileSnapshot = null;
+
+    function setUiEnabled(enabled) {
+        const ids = [
+            'profile-email-input', 'loadProfileBtn',
+            'editBtn', 'saveBtn', 'cancelBtn',
+            'avatarBtn', 'logoutBtn',
+            'changePasswordBtn'
+        ];
+
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+
+            // кнопки/инпуты
+            if (el.tagName === 'INPUT' || el.tagName === 'SELECT' || el.tagName === 'TEXTAREA') {
+                el.disabled = !enabled;
+            } else {
+                el.disabled = !enabled;
+            }
+        });
+
+        // табы "Мои записи" и "Безопасность"
+        document.querySelectorAll('.tab').forEach(btn => {
+            const key = btn.dataset.tab;
+            if (key === 'bookings' || key === 'security') {
+                btn.disabled = !enabled;
+                btn.style.opacity = enabled ? '1' : '.5';
+                btn.style.pointerEvents = enabled ? 'auto' : 'none';
+            }
+        });
+    }
+
+    function applyAuthGate() {
+        const authEmail = localStorage.getItem('rw_auth_email');
+        const loginBlock = document.getElementById('loginBlock');
+
+        if (!authEmail) {
+            if (loginBlock) loginBlock.style.display = 'block';
+            setUiEnabled(false);
+            setActiveTab('profile');
+            return false;
+        }
+
+        if (loginBlock) loginBlock.style.display = 'none';
+        setUiEnabled(true);
+        return true;
+    }
+
+    async function loginClient() {
+        const email = (document.getElementById('loginEmail').value || '').trim();
+        const password = document.getElementById('loginPassword').value || '';
+
+        if (!email || !password) {
+            alert('Введите email и пароль.');
+            return;
+        }
+
+        const btn = document.getElementById('loginBtn');
+        const oldText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Входим…';
+
+        try {
+            const resp = await fetch('/api/clients/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            if (!resp.ok) {
+                const text = await resp.text();
+                alert(text || 'Неверный email или пароль');
+                return;
+            }
+
+            const data = await resp.json();
+
+            // простая “сессия” для учебного проекта
+            localStorage.setItem('rw_auth_email', data.email);
+            localStorage.setItem('rw_auth_id', String(data.id));
+
+            // чтобы работал твой текущий механизм загрузки профиля
+            localStorage.setItem('rw_profile_email', data.email);
+
+            // спрячем вход и включим UI
+            applyAuthGate();
+
+            // загрузим профиль
+            const emailInput = document.getElementById('profile-email-input');
+            if (emailInput) emailInput.value = data.email;
+
+            await loadProfile(data.email);
+
+            // очистим пароль в форме
+            document.getElementById('loginPassword').value = '';
+
+        } catch (e) {
+            console.error(e);
+            alert('Ошибка связи с сервером при входе');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = oldText;
+        }
+    }
+
+
+    function setActiveTab(tabKey) {
+        document.querySelectorAll('.tab').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tab === tabKey);
+        });
+        document.querySelectorAll('.tab-pane').forEach(pane => {
+            pane.classList.toggle('active', pane.id === 'tab-' + tabKey);
+        });
+    }
+
+    function updateUserCard() {
+        const nameEl = document.getElementById('uName');
+        const emailEl = document.getElementById('uEmail');
+        const avatarBox = document.getElementById('avatarBox');
+
+        if (!currentProfile) {
+            nameEl.textContent = 'Гость';
+            emailEl.textContent = 'Email не выбран';
+            avatarBox.innerHTML = '<span id="avatarInitials">RW</span>';
+            return;
+        }
+
+        const name = currentProfile.fullName || 'Клиент';
+        const email = currentProfile.email || '—';
+        nameEl.textContent = name;
+        emailEl.textContent = email;
+
+        let initials = '';
+        if (name) {
+            initials = name
+                .split(' ')
+                .filter(Boolean)
+                .map(part => part[0])
+                .join('')
+                .slice(0, 2)
+                .toUpperCase();
+        }
+        if (!initials) initials = 'RW';
+
+        if (currentProfile.avatarUrl) {
+            avatarBox.innerHTML = '';
+            const img = document.createElement('img');
+            img.alt = name;
+            img.src = currentProfile.avatarUrl;
+            avatarBox.appendChild(img);
+        } else {
+            avatarBox.innerHTML = '<span id="avatarInitials"></span>';
+            const span = document.getElementById('avatarInitials');
+            span.textContent = initials;
+        }
+    }
+
+    function fillProfileForm() {
+        const emailInput = document.getElementById('profile-email-input');
+        const nameInput = document.getElementById('fName');
+        const phoneInput = document.getElementById('fPhone');
+        const birthInput = document.getElementById('fBirth');
+        const addrInput = document.getElementById('fAddr');
+
+        if (!currentProfile) {
+            emailInput.value = '';
+            nameInput.value = '';
+            phoneInput.value = '';
+            birthInput.value = '';
+            addrInput.value = '';
+            return;
+        }
+
+        emailInput.value = currentProfile.email || '';
+        nameInput.value = currentProfile.fullName || '';
+        phoneInput.value = currentProfile.phone || '';
+        birthInput.value = currentProfile.birthDate || '';
+        addrInput.value = currentProfile.address || '';
+    }
+
+    function renderBookings() {
+        const box = document.getElementById('bookings-list');
+        if (!currentProfile) {
+            box.innerHTML = '<p class="muted">Сначала выберите профиль по email во вкладке «Профиль».</p>';
+            return;
+        }
+
+        const bookings = Array.isArray(currentProfile.bookings) ? currentProfile.bookings : [];
+        if (!bookings.length) {
+            box.innerHTML = '<p class="muted">У вас пока нет записей на тренировки.</p>';
+            return;
+        }
+
+        box.innerHTML = '';
+        bookings.forEach(b => {
+            const item = document.createElement('div');
+            item.className = 'booking-item';
+
+            const statusRaw = (b.status || '').toUpperCase();
+            const isCancelled = statusRaw === 'CANCELLED';
+            const isActive = statusRaw === 'ACTIVE';
+
+            let dateText = '';
+            if (b.startTime) {
+                try {
+                    const d = new Date(b.startTime);
+                    dateText = d.toLocaleString('ru-RU', {
+                        year:'numeric', month:'2-digit', day:'2-digit',
+                        hour:'2-digit', minute:'2-digit'
+                    });
+                } catch (e) {}
+            }
+
+            const left = document.createElement('div');
+            left.innerHTML = `
+        <div><b>${b.className || 'Тренировка'}</b></div>
+        <div class="booking-meta">
+          ${dateText || ''}${b.roomName ? ' • Зал: ' + b.roomName : ''}${b.coachName ? ' • Тренер: ' + b.coachName : ''}
+        </div>
+        <div class="booking-meta">
+          Статус:
+          <span class="status-pill ${isActive ? 'status-pill--active' : isCancelled ? 'status-pill--cancelled' : ''}">
+            ${isActive ? 'Активна' : isCancelled ? 'Отменена' : (b.status || '—')}
+          </span>
+          ${b.paid ? ' • оплачено' : ''}
+        </div>
+      `;
+
+            item.appendChild(left);
+
+            if (!isCancelled) {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-ghost btn-sm';
+                btn.textContent = 'Отменить';
+                btn.addEventListener('click', () => cancelBooking(b.bookingId));
+                item.appendChild(btn);
+            }
+
+            box.appendChild(item);
+        });
+    }
+
+    function setEditMode(on) {
+        const nameInput = document.getElementById('fName');
+        const phoneInput = document.getElementById('fPhone');
+        const birthInput = document.getElementById('fBirth');
+        const addrInput = document.getElementById('fAddr');
+
+        const editBtn = document.getElementById('editBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+
+        const disabled = !on;
+        nameInput.disabled = disabled;
+        phoneInput.disabled = disabled;
+        birthInput.disabled = disabled;
+        addrInput.disabled = disabled;
+
+        editBtn.disabled = !currentProfile || on;
+        saveBtn.disabled = !on;
+        cancelBtn.disabled = !on;
+    }
+
+    async function loadProfile(emailOverride) {
+        const emailInput = document.getElementById('profile-email-input');
+        const btn = document.getElementById('loadProfileBtn');
+
+        let email = (emailOverride || emailInput.value || '').trim();
+        if (!email) {
+            alert('Введите email, с которым вы регистрировались.');
+            return;
+        }
+
+        emailInput.value = email;
+        localStorage.setItem('rw_profile_email', email);
+
+        const oldText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Загружаем…';
+
+        try {
+            const resp = await fetch('/api/clients/profile/by-email?email=' + encodeURIComponent(email));
+            if (!resp.ok) {
+                const text = await resp.text();
+                alert(text || 'Профиль не найден');
+                return;
+            }
+
+            const data = await resp.json();
+            currentProfile = data;
+            initialProfileSnapshot = JSON.parse(JSON.stringify(data));
+
+            updateUserCard();
+            fillProfileForm();
+            renderBookings();
+
+            document.getElementById('avatarBtn').disabled = false;
+            document.getElementById('logoutBtn').disabled = false;
+            document.getElementById('editBtn').disabled = false;
+            setEditMode(false);
+            setActiveTab('profile');
+        } catch (e) {
+            console.error(e);
+            alert('Ошибка связи с сервером');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = oldText;
+        }
+    }
+
+    async function saveProfile() {
+        if (!currentProfile || !currentProfile.id) {
+            alert('Сначала загрузите профиль по email.');
+            return;
+        }
+
+        const nameInput = document.getElementById('fName');
+        const phoneInput = document.getElementById('fPhone');
+        const birthInput = document.getElementById('fBirth');
+        const addrInput = document.getElementById('fAddr');
+
+        const fd = new FormData();
+
+        const snap = initialProfileSnapshot || currentProfile;
+
+        const newName = nameInput.value.trim();
+        const oldName = (snap.fullName || '');
+        if (newName !== oldName) {
+            fd.append('fullName', newName);
+        }
+
+        const newPhone = phoneInput.value.trim();
+        const oldPhone = (snap.phone || '');
+        if (newPhone !== oldPhone) {
+            fd.append('phone', newPhone);
+        }
+
+        const newBirth = birthInput.value || '';
+        const oldBirth = (snap.birthDate || '');
+        if (newBirth !== oldBirth) {
+            fd.append('birthDate', newBirth);
+        }
+
+        const newAddr = addrInput.value.trim();
+        const oldAddr = (snap.address || '');
+        if (newAddr !== oldAddr) {
+            fd.append('address', newAddr);
+        }
+
+        if ([...fd.keys()].length === 0) {
+            alert('Вы ничего не изменили.');
+            setEditMode(false);
+            return;
+        }
+
+        const saveBtn = document.getElementById('saveBtn');
+        const oldText = saveBtn.textContent;
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Сохраняем…';
+
+        try {
+            const resp = await fetch('/api/clients/' + currentProfile.id, {
+                method: 'PATCH',
+                body: fd
+            });
+            if (!resp.ok) {
+                const text = await resp.text();
+                alert(text || 'Не удалось сохранить профиль');
+                return;
+            }
+
+            await loadProfile(currentProfile.email);
+            alert('Профиль обновлён ✔');
+        } catch (e) {
+            console.error(e);
+            alert('Ошибка связи с сервером при сохранении профиля');
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.textContent = oldText;
+            setEditMode(false);
+        }
+    }
+
+    function cancelEdit() {
+        if (!currentProfile) return;
+        fillProfileForm();
+        setEditMode(false);
+    }
+
+    async function cancelBooking(bookingId) {
+        if (!bookingId) return;
+        if (!confirm('Отменить эту запись?')) return;
+
+        try {
+            const resp = await fetch('/api/bookings/' + bookingId + '/status/CANCELLED', {
+                method: 'PATCH'
+            });
+            if (!resp.ok) {
+                const text = await resp.text();
+                alert(text || 'Не удалось отменить запись');
+                return;
+            }
+            await loadProfile(currentProfile.email);
+        } catch (e) {
+            console.error(e);
+            alert('Ошибка связи с сервером при отмене записи');
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem('rw_profile_email');
+        localStorage.removeItem('rw_auth_email');
+        localStorage.removeItem('rw_auth_id');
+
+        currentProfile = null;
+        initialProfileSnapshot = null;
+
+        updateUserCard();
+        fillProfileForm();
+        renderBookings();
+        setEditMode(false);
+
+        // вернём UI в “закрытое” состояние
+        const loginBlock = document.getElementById('loginBlock');
+        if (loginBlock) loginBlock.style.display = 'block';
+
+        setUiEnabled(false);
+        setActiveTab('profile');
+
+        alert('Вы вышли из кабинета в этом браузере.');
+    }
+
+
+    function initTabs() {
+        document.querySelectorAll('.tab').forEach(btn => {
+            btn.addEventListener('click', () => {
+                setActiveTab(btn.dataset.tab);
+            });
+        });
+    }
+
+    function initAvatarUpload() {
+        const avatarBtn = document.getElementById('avatarBtn');
+        const avatarInput = document.getElementById('avatarInput');
+        const avatarBox = document.getElementById('avatarBox');
+
+        avatarBtn.addEventListener('click', () => {
+            if (!currentProfile) {
+                alert('Сначала загрузите профиль по email во вкладке «Профиль».');
+                return;
+            }
+            avatarInput.click();
+        });
+
+        avatarInput.addEventListener('change', async () => {
+            const file = avatarInput.files && avatarInput.files[0];
+            if (!file) return;
+
+            if (!currentProfile || !currentProfile.id) {
+                alert('Профиль не загружен.');
+                avatarInput.value = '';
+                return;
+            }
+
+            const okType = ['image/png','image/jpeg','image/webp'].includes(file.type);
+            const okSize = file.size <= 5 * 1024 * 1024;
+
+            if (!okType) {
+                alert('Поддерживаются только PNG, JPG и WebP.');
+                avatarInput.value = '';
+                return;
+            }
+            if (!okSize) {
+                alert('Файл слишком большой. Максимум 5 МБ.');
+                avatarInput.value = '';
+                return;
+            }
+
+            // Локальный предпросмотр
+            const reader = new FileReader();
+            reader.onload = () => {
+                avatarBox.innerHTML = '';
+                const img = document.createElement('img');
+                img.alt = currentProfile.fullName || 'Аватар';
+                img.src = reader.result;
+                avatarBox.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+
+            const fd = new FormData();
+            fd.append('avatar', file);
+
+            try {
+                const resp = await fetch('/api/clients/' + currentProfile.id, {
+                    method: 'PATCH',
+                    body: fd
+                });
+                if (!resp.ok) {
+                    const text = await resp.text();
+                    alert(text || 'Не удалось загрузить аватар');
+                    return;
+                }
+                await loadProfile(currentProfile.email);
+            } catch (e) {
+                console.error(e);
+                alert('Ошибка связи с сервером при загрузке аватара');
+            } finally {
+                avatarInput.value = '';
+            }
+        });
+    }
+
+    function initSecurity() {
+        const btn = document.getElementById('changePasswordBtn');
+        btn.addEventListener('click', async () => {
+
+            if (!currentProfile || !currentProfile.id) {
+                alert('Сначала загрузите свой профиль по email во вкладке «Профиль».');
+                return;
+            }
+
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const repeatPassword = document.getElementById('repeatPassword').value;
+
+            if (!currentPassword || !newPassword || !repeatPassword) {
+                alert('Заполните все поля.');
+                return;
+            }
+
+            if (newPassword !== repeatPassword) {
+                alert('Новые пароли не совпадают.');
+                return;
+            }
+
+            try {
+                const resp = await fetch('/api/clients/' + currentProfile.id + '/password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        currentPassword: currentPassword,
+                        newPassword: newPassword,
+                        confirmNewPassword: repeatPassword
+                    })
+                });
+
+                if (!resp.ok) {
+                    const text = await resp.text();
+                    alert(text || 'Не удалось сменить пароль');
+                    return;
+                }
+
+                alert('Пароль успешно изменён ✔');
+
+                // очистим поля
+                document.getElementById('currentPassword').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('repeatPassword').value = '';
+
+            } catch (e) {
+                console.error(e);
+                alert('Ошибка связи с сервером при смене пароля');
+            }
+        });
+    }
+
+
+    function initCabinet() {
+        initTabs();
+        initAvatarUpload();
+        initSecurity();
+
+        document.getElementById('loadProfileBtn').addEventListener('click', () => loadProfile());
+        document.getElementById('editBtn').addEventListener('click', () => setEditMode(true));
+        document.getElementById('saveBtn').addEventListener('click', saveProfile);
+        document.getElementById('cancelBtn').addEventListener('click', cancelEdit);
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+
+        const loginBtn = document.getElementById('loginBtn');
+        if (loginBtn) loginBtn.addEventListener('click', loginClient);
+
+        // если уже “вошли” ранее — поднимем профиль
+        const ok = applyAuthGate();
+        if (ok) {
+            const saved = localStorage.getItem('rw_auth_email');
+            if (saved) {
+                const emailInput = document.getElementById('profile-email-input');
+                if (emailInput) emailInput.value = saved;
+                loadProfile(saved);
+            }
+        }
+    }
+
+
+    initCabinet();
+</script>
+
+</body>
+</html>

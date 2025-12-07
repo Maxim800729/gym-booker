@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>ФТАР · Бронирование</title>
+    <link rel="icon" type="image/png" href="/img/logo.png"/>
+
+    <style>
+        :root{
+            --bg:#0c0c0f; --panel:#12141a; --text:#f7f7f8; --muted:#a6adbb;
+            --brand:#ff7a00; --brand-2:#ff9c3a; --accent:#0ea5e9;
+            --ok:#22c55e; --danger:#ef4444; --border:#22252d; --chip:#1a1e27;
+        }
+        *{box-sizing:border-box}
+        body{
+            margin:0;
+            font:16px/1.5 Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;
+            color:var(--text);
+            background:linear-gradient(180deg,#0c0c0f,#0e1116);
+        }
+        .wrap{max-width:1200px;margin:0 auto;padding:0 20px}
+        header{
+            position:sticky;top:0;z-index:30;
+            backdrop-filter:saturate(160%) blur(8px);
+            background:rgba(12,12,15,.65);
+            border-bottom:1px solid var(--border)
+        }
+        .head{display:flex;align-items:center;gap:16px;padding:14px 0}
+        .logo{display:flex;align-items:center;gap:12px;font-weight:800}
+        .logo img{width:72px;height:72px;border-radius:10px;object-fit:cover}
+        .logo span{
+            font-size: clamp(28px, 3.2vw, 44px);
+            font-weight: 900;
+            letter-spacing: .6px;
+            line-height: 1;
+        }
+        @media (max-width: 900px){
+            .logo img{width:60px;height:60px;}
+        }
+        @media (max-width: 640px){
+            .head{padding:10px 0;}
+            .logo span{font-size: clamp(22px, 6vw, 28px);}
+            nav{gap:12px;}
+        }
+
+        /* огненный логотип */
+        .brand-fire{
+            position: relative;
+            color: #fff7ed;
+            text-shadow:
+                    0 0 2px   #fff7ed,
+                    0 0 8px #4000ff,
+                    0 0 16px #0800ff,
+                    0 0 28px  #ff6a00,
+                    0 0 46px #0800ff;
+            animation: fireFlicker 2.6s infinite ease-in-out;
+        }
+        .brand-fire::after{
+            content: attr(data-text);
+            position: absolute; inset: 0;
+            pointer-events: none;
+            color: #ff0062;
+            opacity: .55;
+            filter: blur(8px) saturate(1.2);
+            animation: heatWave 3.2s infinite ease-in-out;
+            z-index: -1;
+        }
+        @keyframes fireFlicker{
+            0%, 18%, 22%, 25%, 53%, 57%, 100%{
+                text-shadow:
+                        0 0 2px   #fff7ed,
+                        0 0 10px #0800ff,
+                        0 0 20px #1e29ff,
+                        0 0 34px #4000ff,
+                        0 0 60px #ff0062;
+            }
+            20%, 24%, 55%{
+                text-shadow:
+                        0 0 1px #ffffff,
+                        0 0 6px #4000ff,
+                        0 0 12px #1e29ff,
+                        0 0 22px #0800ff,
+                        0 0 34px #ff0062;
+            }
+            40%, 70%{
+                text-shadow:
+                        0 0 3px #ffffff,
+                        0 0 14px #0800ff,
+                        0 0 28px #1e29ff,
+                        0 0 48px #4000ff,
+                        0 0 84px #ff0062;
+            }
+        }
+        @keyframes heatWave{
+            0%, 100% { transform: translateY(0) }
+            50%      { transform: translateY(-1px) }
+        }
+        @media (prefers-reduced-motion: reduce){
+            .brand-fire, .brand-fire::after{ animation: none }
+        }
+
+        nav{margin-left:auto;display:flex;gap:18px;align-items:center}
+        nav a{color:var(--muted);font-weight:600;text-decoration:none}
+        nav a:hover{color:var(--text)}
+
+        .btn{
+            display:inline-flex;align-items:center;gap:8px;
+            border:1px solid var(--border);
+            background:linear-gradient(180deg,#1a1e27,#131720);
+            padding:10px 14px;border-radius:12px;
+            color:#fff;font-weight:700;
+            cursor:pointer;
+        }
+        .btn--brand{
+            background:linear-gradient(180deg,var(--brand),var(--brand-2));
+            border:none;color:#111;
+            box-shadow:0 6px 24px rgba(255,122,0,.12)
+        }
+        .btn--sm{padding:6px 10px;font-size:14px}
+
+        .grid{display:grid;gap:16px}
+        .two{display:grid;grid-template-columns:1fr 420px;gap:16px}
+        @media(max-width:900px){.two{grid-template-columns:1fr}}
+        .card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:18px}
+        .h1{font-size:28px;margin:12px 0 8px}
+        .h2{font-size:22px;margin:6px 0 14px}
+        .row{display:flex;gap:12px;flex-wrap:wrap}
+        .input{
+            flex:1 1 260px; min-width:220px;
+            color:#fff;background:#0f131a;
+            border:1px solid var(--border);
+            border-radius:12px;padding:12px 14px
+        }
+        .muted{color:var(--muted)}
+        .session{border:1px solid var(--border);border-radius:14px;padding:12px;display:grid;gap:10px}
+        .list{display:grid;gap:12px}
+        .profile-header{display:flex;gap:12px;align-items:center;margin-bottom:8px}
+        .profile-avatar{
+            width:52px;height:52px;border-radius:999px;
+            background:#222;object-fit:cover;flex-shrink:0;
+        }
+        .profile-booking{border:1px solid var(--border);border-radius:12px;padding:10px}
+        hr{border:none;border-top:1px solid var(--border);margin:14px 0;}
+    </style>
+</head>
+<body>
+<header>
+    <div class="wrap head">
+        <div class="logo">
+            <img src="/img/logo.png" alt="RigertWorkout">
+            <span class="brand-fire" data-text="RigertWorkout">RigertWorkout</span>
+        </div>
+
+        <nav>
+            <a href="/">Главная</a>
+            <a href="/#coaches">Тренеры</a>
+            <a href="/#gallery">Галерея</a>
+            <a href="/admin" class="btn btn--sm">Админка</a>
+            <a href="/cabinet">Личный кабинет</a>
+
+        </nav>
+    </div>
+</header>
+
+<main class="wrap" style="padding:26px 0">
+    <div class="two">
+        <!-- ЛЕВАЯ КОЛОНКА — занятия -->
+        <section class="card">
+            <div class="h2">Занятия</div>
+            <div id="sessions" class="list"></div>
+        </section>
+
+        <!-- ПРАВАЯ КОЛОНКА — личный кабинет -->
+        <aside class="card">
+            <div class="h2">Личный кабинет</div>
+
+            <!-- РЕГИСТРАЦИЯ -->
+            <div style="font-weight:600;margin-bottom:6px;">Регистрация нового клиента</div>
+            <div class="row" style="margin-bottom:6px">
+                <input id="reg-fullname" type="text" class="input" placeholder="ФИО"/>
+            </div>
+            <div class="row" style="margin-bottom:6px">
+                <input id="reg-email" type="email" class="input" placeholder="Email для входа"/>
+            </div>
+            <div class="row" style="margin-bottom:10px">
+                <input id="reg-password" type="password" class="input" placeholder="Пароль"/>
+                <button id="reg-btn" class="btn btn--brand">Зарегистрироваться</button>
+            </div>
+
+            <hr/>
+
+            <!-- ВХОД -->
+            <div style="font-weight:600;margin-bottom:6px;">Вход</div>
+            <div class="row" style="margin-bottom:6px">
+                <input id="login-email" type="email" class="input" placeholder="email для входа"/>
+            </div>
+            <div class="row" style="margin-bottom:8px">
+                <input id="login-password" type="password" class="input" placeholder="пароль"/>
+                <button id="login-btn" class="btn btn--brand">Войти</button>
+            </div>
+
+            <div class="muted" style="font-size:14px;margin-bottom:10px;">
+                После входа мы запомним ваш email и покажем ваши записи ниже.
+            </div>
+
+            <!-- Просмотр профиля -->
+            <div class="row" style="margin-bottom:8px">
+                <input id="profile-email-input" type="email" class="input" placeholder="ваш email"/>
+                <button id="profile-show-btn" class="btn btn--brand">Показать</button>
+            </div>
+
+            <div class="muted" style="font-size:14px;margin-bottom:10px;">
+                Сохраните email, чтобы быстро находить свои записи.
+            </div>
+
+            <!-- информация о клиенте -->
+            <div id="profile-info" style="margin-bottom:12px;font-size:14px;"></div>
+
+            <!-- список его записей -->
+            <div id="profile-bookings" class="list"></div>
+        </aside>
+    </div>
+</main>
+
+<script>
+    // ------- Загрузка расписания -------
+
+    async function loadSessions(){
+        const box = document.getElementById('sessions');
+        box.innerHTML = '<div class="muted">Загружаем…</div>';
+        try{
+            const r = await fetch('/api/sessions');
+            if(!r.ok) throw 0;
+            const data = await r.json();
+            if(!Array.isArray(data) || !data.length){
+                box.innerHTML = '<div class="muted">Нет занятий</div>'; return;
+            }
+
+            box.innerHTML = data.map(s => {
+                const classTitle = s.classType?.title ?? 'Занятие';
+                const start      = s.startAt ? new Date(s.startAt).toLocaleString('ru-RU') : '';
+                const duration   = s.classType?.durationMin ?? s.classType?.durationMinutes ?? 0;
+                const coachName  = s.coach?.fullName ?? 'Тренер уточняется';
+
+                return `
+                <div class="session">
+                  <div class="row" style="justify-content:space-between;align-items:center">
+                    <strong>${classTitle}</strong>
+                    <span class="muted">${start}</span>
+                  </div>
+                  <div class="muted">Тренер: ${coachName}</div>
+                  <div class="muted">
+                    Длительность: ${duration} мин
+                  </div>
+                  <div class="row">
+                    <input class="input" id="email-${s.id}" type="email" placeholder="ваш email">
+                    <button class="btn btn--brand" onclick="book(${s.id})">Записаться</button>
+                  </div>
+                </div>
+                `;
+            }).join('');
+        }catch(e){
+            console.error(e);
+            box.innerHTML = '<div class="muted">Ошибка загрузки занятий</div>';
+        }
+    }
+
+    // ------- Создание брони -------
+
+    async function book(sessionId){
+        const emailInput = document.getElementById(`email-${sessionId}`);
+        const email = emailInput?.value?.trim();
+        if(!email){
+            alert('Укажите email'); return;
+        }
+
+        try{
+            const r = await fetch('/api/bookings', {
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({ classSessionId: sessionId, userEmail: email })
+            });
+            if(!r.ok){
+                const t = await r.text();
+                alert('Не удалось записаться:\n' + t);
+                return;
+            }
+            alert('Запись создана ✔');
+            emailInput.value = '';
+
+            // если справа открыт этот же email — обновим профиль
+            const current = document.getElementById('profile-email-input').value.trim();
+            if(current && current.toLowerCase() === email.toLowerCase()){
+                loadProfile();
+            }
+        }catch(e){
+            console.error(e);
+            alert('Нет связи с сервером');
+        }
+    }
+
+    // ------- Регистрация нового клиента -------
+
+    async function registerClient() {
+        const fullNameInput = document.getElementById('reg-fullname');
+        const emailInput    = document.getElementById('reg-email');
+        const passInput     = document.getElementById('reg-password');
+
+        const fullName = fullNameInput.value.trim();
+        const email    = emailInput.value.trim();
+        const password = passInput.value.trim();
+
+        if (!fullName || !email || !password) {
+            alert('Заполните имя, email и пароль');
+            return;
+        }
+
+        try {
+            const r = await fetch('/api/clients/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    fullName: fullName,
+                    email: email,
+                    password: password
+                })
+            });
+
+            if (!r.ok) {
+                const t = await r.text();
+                alert('Ошибка регистрации:\n' + t);
+                return;
+            }
+
+            alert('Регистрация успешна! Теперь можете войти.');
+
+            // подставим email в поля входа и профиля
+            const loginEmailInput    = document.getElementById('login-email');
+            const profileEmailInput  = document.getElementById('profile-email-input');
+
+            if (loginEmailInput)   loginEmailInput.value   = email;
+            if (profileEmailInput) profileEmailInput.value = email;
+
+        } catch (e) {
+            console.error(e);
+            alert('Ошибка связи с сервером при регистрации');
+        }
+    }
+
+    // ------- Вход клиента (email + пароль) -------
+
+    async function login() {
+        const emailInput = document.getElementById('login-email');
+        const passInput  = document.getElementById('login-password');
+
+        const email = emailInput.value.trim();
+        const password = passInput.value.trim();
+
+        if (!email || !password) {
+            alert('Введите email и пароль');
+            return;
+        }
+
+        try {
+            const r = await fetch('/api/clients/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ email, password })
+            });
+
+            if (!r.ok) {
+                const t = await r.text();
+                alert('Ошибка входа:\n' + t);
+                return;
+            }
+
+            alert('Вход выполнен ✔');
+
+            // запомним email и подставим в профиль
+            localStorage.setItem('rw_profile_email', email);
+            const profileEmailInput = document.getElementById('profile-email-input');
+            if (profileEmailInput) {
+                profileEmailInput.value = email;
+            }
+
+            // сразу подгрузим профиль
+            loadProfile();
+
+        } catch (e) {
+            console.error(e);
+            alert('Ошибка связи с сервером при входе');
+        }
+    }
+
+    // ------- Личный кабинет: профиль + его записи -------
+
+    async function loadProfile(){
+        const emailInput = document.getElementById('profile-email-input');
+        const email = emailInput.value.trim();
+        if(!email){
+            alert('Введите email'); return;
+        }
+
+        // запомним email в localStorage
+        localStorage.setItem('rw_profile_email', email);
+
+        const btn = document.getElementById('profile-show-btn');
+        const oldText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Загружаем…';
+
+        const infoBox = document.getElementById('profile-info');
+        const bookingsBox = document.getElementById('profile-bookings');
+        infoBox.innerHTML = '';
+        bookingsBox.innerHTML = '<div class="muted">Загружаем записи…</div>';
+
+        try{
+            const r = await fetch(`/api/clients/profile/by-email?email=${encodeURIComponent(email)}`);
+            if(!r.ok){
+                const t = await r.text();
+                throw new Error(t || 'Ошибка загрузки профиля');
+            }
+            const profile = await r.json();
+
+            // блок с инфой о клиенте
+            const created = profile.createdAt ? new Date(profile.createdAt).toLocaleDateString('ru-RU') : '—';
+            const birth   = profile.birthDate ? profile.birthDate : '—';
+
+            infoBox.innerHTML = `
+                <div class="profile-header">
+                    <img class="profile-avatar"
+                         src="${profile.avatarUrl || '/img/logo.png'}"
+                         alt="${profile.fullName || 'Клиент'}">
+                    <div>
+                        <div><strong>${profile.fullName || 'Клиент'}</strong></div>
+                        <div class="muted" style="font-size:13px">${profile.email}</div>
+                    </div>
+                </div>
+                <div style="font-size:14px">
+                    <div><b>Телефон:</b> ${profile.phone || '—'}</div>
+                    <div><b>Дата рождения:</b> ${birth}</div>
+                    <div><b>Адрес:</b> ${profile.address || '—'}</div>
+                    <div><b>Клиент с:</b> ${created}</div>
+                </div>
+            `;
+
+            // его бронирования
+            bookingsBox.innerHTML = '';
+            if(!profile.bookings || !profile.bookings.length){
+                bookingsBox.innerHTML = '<div class="muted">Записей пока нет</div>';
+            }else{
+                profile.bookings.forEach(b => {
+                    const item = document.createElement('div');
+                    item.className = 'profile-booking';
+
+                    const start = b.startTime
+                        ? new Date(b.startTime).toLocaleString('ru-RU', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })
+                        : '';
+
+                    item.innerHTML = `
+                        <div><b>${b.className}</b></div>
+
+                        <div class="muted" style="font-size:14px; line-height:1.5;">
+                            <div><b>Дата и время:</b> ${start || '—'}</div>
+                            <div><b>Тренер:</b> ${b.coachName || '—'}</div>
+                            <div><b>Зал:</b> ${b.roomName || '—'}</div>
+                            <div><b>Длительность:</b> ${b.durationMinutes || 0} мин</div>
+                        </div>
+
+                        <div style="margin-top:6px;font-size:14px">
+                            Статус: <b>${b.status}</b><br/>
+                            Оплата: ${b.paid ? 'оплачено' : 'не оплачено'}
+                        </div>
+                    `;
+
+                    bookingsBox.appendChild(item);
+                });
+            }
+
+        }catch(e){
+            console.error(e);
+            infoBox.innerHTML = '';
+            bookingsBox.innerHTML = '<div class="muted">Не удалось загрузить данные. Проверьте email.</div>';
+            alert('Ошибка: ' + e.message);
+        }finally{
+            btn.disabled = false;
+            btn.textContent = oldText;
+        }
+    }
+
+    // обработчик регистрации
+    document.getElementById('reg-btn')
+        .addEventListener('click', registerClient);
+
+    // обработчик входа
+    document.getElementById('login-btn')
+        .addEventListener('click', login);
+
+    // обработчик профиля
+    document.getElementById('profile-show-btn')
+        .addEventListener('click', loadProfile);
+
+    // подставляем сохранённый email
+    (function restoreEmail(){
+        const saved = localStorage.getItem('rw_profile_email');
+        if(saved){
+            const profileInput = document.getElementById('profile-email-input');
+            const loginInput   = document.getElementById('login-email');
+            profileInput.value = saved;
+            if (loginInput) loginInput.value = saved;
+        }
+    })();
+
+    // старт: загружаем расписание
+    loadSessions();
+</script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+spring:
+  datasource:
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    url: jdbc:sqlserver://localhost:1433;databaseName=gym;encrypt=false;trustServerCertificate=true
+    username: gym
+    password: "GymStrong#2025"   # <-- кавычки обязательны
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.dialect: org.hibernate.dialect.SQLServerDialect
+    open-in-view: false
+  flyway:
+    enabled: true
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  web:
+    resources:
+      add-mappings: true
+      static-locations: classpath:/static/, file:./
+
+app:
+  upload:
+    avatars-dir: uploads/avatars
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,mappings
+
+server:
+  error:
+    include-message: always
+    include-binding-errors: always
+
+springdoc:
+  swagger-ui:
+    path: /swagger
+  disable-swagger-default-url: true

@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8"/>
+    <title>Админка · RigertWorkout</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <style>
+        :root{
+            --bg:#020617;--panel:#020617;--text:#f9fafb;--muted:#9ca3af;
+            --border:#1f2933;--brand:#f97316;--danger:#ef4444;--ok:#22c55e;
+        }
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{
+            font:14px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background:radial-gradient(circle at top,#111827,#020617);
+            color:var(--text);
+        }
+        header{
+            padding:12px 20px;
+            border-bottom:1px solid var(--border);
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+        }
+        .logo{font-weight:800;font-size:18px}
+        .link{
+            color:var(--muted);
+            text-decoration:none;
+            margin-left:12px;
+        }
+        .link:hover{color:var(--text)}
+        main{padding:16px 20px;max-width:1200px;margin:0 auto;}
+        h1{font-size:22px;margin-bottom:12px;}
+        .card{
+            border:1px solid var(--border);
+            border-radius:14px;
+            padding:14px;
+            background:rgba(15,23,42,.9);
+            box-shadow:0 18px 40px rgba(15,23,42,.7);
+        }
+        table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px;}
+        th,td{padding:6px 8px;border-bottom:1px solid rgba(31,41,55,.7);text-align:left;vertical-align:top;}
+        th{font-size:12px;text-transform:uppercase;color:var(--muted);letter-spacing:.04em;}
+        tr:last-child td{border-bottom:none;}
+        .status{font-weight:600;font-size:12px;padding:2px 6px;border-radius:999px;display:inline-block;}
+        .status-ACTIVE{background:rgba(34,197,94,.1);color:var(--ok);}
+        .status-CANCELLED{background:rgba(239,68,68,.1);color:var(--danger);}
+
+        .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;}
+        .btn{
+            border-radius:999px;
+            border:1px solid var(--border);
+            background:#0b1120;
+            color:var(--text);
+            padding:6px 10px;
+            cursor:pointer;
+            font-size:13px;
+        }
+        .btn:hover{background:#020617;}
+
+        input[type="search"]{
+            background:#020617;
+            border-radius:999px;
+            border:1px solid var(--border);
+            padding:6px 10px;
+            color:var(--text);
+            min-width:220px;
+        }
+
+        .muted{color:var(--muted);font-size:13px;}
+
+        /* компактные элементы управления в таблице */
+        .control-select{
+            background:#020617;
+            border:1px solid var(--border);
+            color:var(--text);
+            border-radius:10px;
+            padding:4px 8px;
+            font-size:12px;
+        }
+        .control-dt{
+            background:#020617;
+            border:1px solid var(--border);
+            color:var(--text);
+            border-radius:10px;
+            padding:4px 8px;
+            font-size:12px;
+            min-width:170px;
+        }
+        .btn-save{
+            padding:4px 10px;
+            font-size:12px;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="logo">RigertWorkout · Admin</div>
+    <div>
+        <a class="link" href="/">Сайт</a>
+        <a class="link" href="/booking">Бронирование</a>
+    </div>
+</header>
+
+<main>
+    <h1>Брони клиентов</h1>
+    <div class="card">
+        <div class="toolbar">
+            <div class="muted">Список всех бронирований из /api/bookings</div>
+            <div>
+                <input id="search-input" type="search" placeholder="Фильтр по email">
+                <button class="btn" onclick="loadBookings()">Обновить</button>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Email</th>
+                <th>Сессия</th>
+                <th>Статус</th>
+                <th>Оплата</th>
+                <th>Оплатить до</th>
+                <th>Создано</th>
+                <th>Действия</th>
+            </tr>
+            </thead>
+            <tbody id="bookings-body">
+            <tr><td colspan="8" class="muted">Загрузка…</td></tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<script>
+    function toLocalDT(iso) {
+        if (!iso) return "";
+        const d = new Date(iso);
+        const p = n => String(n).padStart(2, "0");
+        return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+    }
+
+    function fromLocalDT(val) {
+        if (!val) return null;
+        return new Date(val).toISOString();
+    }
+
+    async function savePayment(id) {
+        const paidSel = document.getElementById(`paid-${id}`);
+        const untilInp = document.getElementById(`until-${id}`);
+
+        const paid = paidSel.value === "true";
+        const paidUntilIso = fromLocalDT(untilInp.value);
+
+        const body = { paid };
+        if (paidUntilIso) body.paidUntil = paidUntilIso;
+
+        const resp = await fetch(`/api/bookings/${id}/payment`, {
+            method: "PATCH",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify(body)
+        });
+
+        if (!resp.ok) {
+            alert(await resp.text() || "Ошибка обновления оплаты");
+            return;
+        }
+        loadBookings();
+    }
+
+    async function loadBookings(page = 0) {
+        const tbody = document.getElementById('bookings-body');
+        const q = document.getElementById('search-input').value.trim();
+
+        tbody.innerHTML = '<tr><td colspan="8" class="muted">Загрузка…</td></tr>';
+
+        try {
+            const params = new URLSearchParams({
+                q,
+                page,
+                size: 100,
+                sort: 'createdAt,desc'
+            });
+
+            const resp = await fetch('/api/bookings?' + params.toString());
+            if (!resp.ok) {
+                const txt = await resp.text();
+                tbody.innerHTML =
+                    `<tr><td colspan="8" class="muted">Ошибка: ${resp.status} ${txt}</td></tr>`;
+                return;
+            }
+
+            const pageData = await resp.json(); // spring Page
+            const content = pageData.content || pageData;
+
+            if (!content.length) {
+                tbody.innerHTML = '<tr><td colspan="8" class="muted">Нет данных</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = content.map(b => {
+                const created = b.createdAt
+                    ? new Date(b.createdAt).toLocaleString()
+                    : '';
+                const statusClass = 'status-' + (b.status || 'UNKNOWN');
+
+                return `
+                  <tr>
+                    <td>${b.id}</td>
+                    <td>${b.userEmail}</td>
+                    <td>${b.classSessionId ?? ''}</td>
+                    <td><span class="status ${statusClass}">${b.status}</span></td>
+
+                    <td>
+                      <select id="paid-${b.id}" class="control-select">
+                        <option value="true" ${b.paid ? 'selected' : ''}>оплачено</option>
+                        <option value="false" ${!b.paid ? 'selected' : ''}>не оплачено</option>
+                      </select>
+                    </td>
+
+                    <td>
+                      <input id="until-${b.id}"
+                             class="control-dt"
+                             type="datetime-local"
+                             value="${toLocalDT(b.paidUntil)}">
+                    </td>
+
+                    <td>${created}</td>
+
+                    <td>
+                      <button class="btn btn-save" onclick="savePayment(${b.id})">
+                        Сохранить
+                      </button>
+                    </td>
+                  </tr>
+                `;
+            }).join('');
+
+        } catch (e) {
+            console.error(e);
+            tbody.innerHTML =
+                '<tr><td colspan="8" class="muted">Ошибка загрузки</td></tr>';
+        }
+    }
+
+    loadBookings();
+</script>
+</body>
+</html>
